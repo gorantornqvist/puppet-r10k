@@ -221,6 +221,7 @@ class r10k::params
   $webhook_port                  = '8088'
   $webhook_access_logfile        = '/var/log/webhook/access.log'
   $webhook_client_cfg            = '/var/lib/peadmin/.mcollective'
+  $webhook_default_branch        = 'production'
   $webhook_use_mco_ruby          = false
   $webhook_protected             = true
   $webhook_github_secret         = undef
@@ -232,6 +233,7 @@ class r10k::params
   $webhook_enable_ssl            = true
   $webhook_use_mcollective       = true
   $webhook_r10k_deploy_arguments = '-pv'
+  $webhook_r10k_deploymodule_postrun = undef
   $webhook_bin_template          = 'r10k/webhook.bin.erb'
   $webhook_yaml_template         = 'r10k/webhook.yaml.erb'
   $webhook_r10k_command_prefix   = 'umask 0022;' # 'sudo' is the canonical example for this

@@ -1,3 +1,72 @@
+# satellite6_webhook fork of puppet-r10k-v4.2.0
+
+## General Information
+
+This fork has been created to make the webhook service functional and working with Red Hat Satellite 6/Puppet 3.8 and Atlassian Bitbucket Server
+Its been tested with Satellite 6.2 running on RHEL7 and Atlassian Bitbucket v5.
+
+Only the r10k::webhook and r10k::webhook::config classes and related files has been changed and tested.
+
+## Summary of changes
+
+* Custom webhook binary (templates/webhook.custom.service.erb)
+  * She-bang has been changed to /usr/bin/env ruby so it can be used with Ruby from Software Collections
+  * Additional logging for debug purposes
+  * Add r10k_deploy_arguments to r10k deploy module command since it was missing
+  * Add new config option r10k_deploymodule_postrun to be able to run a script after a module is deployed
+  * run_command() print command when error is raised for debugging
+  * Checking changeset changed path names in bitbucket payload if Puppetfile is modified and if true passing --puppetfile to r10k deploy environment
+  * Logging of all commit ids for debugging purposes
+  * Do not deploy modules or environments when a tag is pushed
+  * Back ported changes from v.6: default_branch, sanitize_input(), handling delete branch 
+
+* Custom webhook service (templates/webhook.custom.service.erb)
+  * Run webhook using Software Collections (rh-ruby24)
+
+* Custom prefix_command.rb file (files/prefix_command.bitbucket.rb)
+  * Looks up correct r10k prefix using repository name and repository project key from bitbucket webhook payload
+
+* Updated webhook config class (manifests/webhook/config.pp)
+  * New config option r10k_deploymodule_postrun
+
+* Updated webhook default parameter values (manifests/params.pp)
+  * webhook_default_branch = productio* Updated webhook default parameter values (manifests/params.pp)
+  * webhook_default_branch = production
+
+* r10k postrun script (files/r10k-postrun.sh)
+  * Creates puppet environments of newly deployed environments in Satellite using hammer command
+  * Rsync of r10k base directory to hosts (capsules)
+
+* Example puppet profile for usage (manifests/profile_webhook.pp)
+
+## Usage
+
+* Install r10k using the following articles: https://access.redhat.com/blogs/1169563/posts/2216351
+* Install dependencies manually:
+```
+yum install rh-ruby24-ruby
+scl enable rh-ruby24 bash
+gem install sinatra
+```
+* If you use prefixing in r10k.yaml, make sure your r10k sources contain project_key and repository_name, example:
+```
+sources:
+  # built in (empty) "production" environment
+  production:
+    remote: 'file:///etc/puppet/r10k/etc/production_environment'
+    basedir: '/etc/puppet/r10k/environments'
+    prefix: false
+  pm_my_puppet_repo:
+    remote: 'ssh://bitbucket.mycompany.com:2222/myproj/myrepo.git'
+    basedir: '/etc/puppet/r10k/environments'
+    prefix: true
+    project_key: 'MYPROJ'
+    repository_name: 'myrepo'
+```
+* Apply puppet config, see example puppet profile above
+
+---
+
 # r10k Configuration Module
 [![Puppet Forge](http://img.shields.io/puppetforge/v/puppet/r10k.svg)](https://forge.puppetlabs.com/puppet/r10k)
 [![Build Status](https://travis-ci.org/voxpupuli/puppet-r10k.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-r10k)
