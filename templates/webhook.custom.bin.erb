@@ -107,10 +107,9 @@ end
       module_name = ( data['repository']['name'] ).sub(/^.*-/, '')
     end
 
-    fromHash = data['refChanges'][0]['fromHash'] rescue ''
-    if fromHash == '0000000000000000000000000000000000000000'
-      tag = data['refChanges'][0]['refId'] rescue ''
-      $logger.info("Tag #{tag} pushed, ignoring deploy of module #{module_name}")
+    refId = data['refChanges'][0]['refId'] rescue ''
+    if fromHash == '0000000000000000000000000000000000000000' and refId.include? 'refs/tags'
+      $logger.info("Tag #{refId} pushed, ignoring deploy of module #{module_name}")
       return 200
     else
       commitids = ""
@@ -206,10 +205,9 @@ end
       branch = sanitize_input(branch)
     end
 
-    fromHash = data['refChanges'][0]['fromHash'] rescue ''
-    if fromHash == '0000000000000000000000000000000000000000'
-      tag = data['refChanges'][0]['refId'] rescue ''
-      $logger.info("Tag #{tag} pushed, ignoring deploy of environment #{prefix}_#{branch}")        
+    refId = data['refChanges'][0]['refId'] rescue ''
+    if fromHash == '0000000000000000000000000000000000000000' and refId.include? 'refs/tags'
+      $logger.info("Tag #{refId} pushed, ignoring deploy of module #{module_name}")
       return 200
     else
       # Check each commit and its files
